@@ -5,9 +5,10 @@
 
 using namespace std;
 
-#define PI				3.14159265358979323846
-#define	COLORNUM		14
-#define DRIVEN_WHEEL_E	0.3
+#define PI								3.14159265358979323846
+#define	COLORNUM						14
+#define DRIVEN_WHEEL_E					0.3
+#define ROTATE_WHEEL_ADJUST_FACTOR		1.6
 
 
 float	ColorArr[COLORNUM][3] = { {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, { 0.0,  0.0, 1.0},
@@ -668,8 +669,8 @@ void Mesh::CreateRotateWheel(int nSegment, Point3 O1, float fShape2HigherHeight,
 	// xac dinh cac dinh cua hinh hop
 	Point3 p1{ float(O2.x + fCylinderRadius * sin(fShape2CentralLeanAngle + 3 * PI / 2)), fShape2BaseHeight, float(O2.z + fCylinderRadius * cos(fShape2CentralLeanAngle + 3 * PI / 2)) };
 	Point3 p4{ float(O2.x + fCylinderRadius * sin(fShape2CentralLeanAngle + PI / 2)), fShape2BaseHeight, float(O2.z + fCylinderRadius * cos(fShape2CentralLeanAngle + PI / 2)) };
-	Point3 p2{ float(p1.x + (O1_O2_len + 1.0) * sin(fShape2CentralLeanAngle)), fShape2BaseHeight, float(p1.z + (O1_O2_len)*cos(fShape2CentralLeanAngle)) };
-	Point3 p3{ float(p4.x + (O1_O2_len + 1.0) * sin(fShape2CentralLeanAngle)), fShape2BaseHeight, float(p4.z + (O1_O2_len)*cos(fShape2CentralLeanAngle)) };
+	Point3 p2{ float(p1.x + (O1_O2_len * ROTATE_WHEEL_ADJUST_FACTOR) * sin(fShape2CentralLeanAngle)), fShape2BaseHeight, float(p1.z + (O1_O2_len * ROTATE_WHEEL_ADJUST_FACTOR)*cos(fShape2CentralLeanAngle)) };
+	Point3 p3{ float(p4.x + (O1_O2_len * ROTATE_WHEEL_ADJUST_FACTOR) * sin(fShape2CentralLeanAngle)), fShape2BaseHeight, float(p4.z + (O1_O2_len * ROTATE_WHEEL_ADJUST_FACTOR)*cos(fShape2CentralLeanAngle)) };
 	pt[shape2NumVerts + cylinderNumVerts + 0].set(p1.x, p1.y, p1.z);
 	pt[shape2NumVerts + cylinderNumVerts + 1].set(p2.x, p2.y, p2.z);
 	pt[shape2NumVerts + cylinderNumVerts + 2].set(p3.x, p3.y, p3.z);

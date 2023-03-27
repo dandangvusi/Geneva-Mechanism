@@ -48,7 +48,7 @@ float DW_fBaseObjectHeight = 0.5;
 Point3 RW_O1{ 0.0, 0.0, 1.4 };
 float RW_fShape2HigherHeight = 0.5;
 float RW_fShape2LowerHeight = 0.25;
-float RW_fShape2InRadius = 0.4;
+float RW_fShape2InRadius = 0.5;
 float RW_fShape2OutRadius = 0.7;
 int RW_iShape2OpenAngle = 60;
 int RW_iShape2CentralLeanAngle = 0;
@@ -106,8 +106,8 @@ void drawRotateWheel() {
 }
 
 void drawObject() {
-	//drawBasePlate();
-	//drawDrivenWheel();
+	drawBasePlate();
+	drawDrivenWheel();
 	drawRotateWheel();
 }
 
