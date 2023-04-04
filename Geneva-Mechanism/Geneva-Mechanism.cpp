@@ -25,9 +25,11 @@ float camera_X, camera_Y, camera_Z;
 float lookAt_X, lookAt_Y, lookAt_Z;
 
 // Tham so chung cua vat the
-int nSegment = 20;
+int  nSegment = 20;
 bool bDrawWireFrame = false;
 bool bTopView = false;
+bool bAnimate = false;
+bool bSecondLight = false;
 
 // Tham so kich thuoc cua base plate
 float BasePlate_Size = 5.0;
@@ -119,18 +121,25 @@ void createObject() {
 
 void myDisplay()
 {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	if (bTopView) {
-		gluLookAt(0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+	camera_X = camera_distance * sinf(camera_angle * PI / 180);
+	camera_Y = camera_height;
+	camera_Z = camera_distance * cosf(camera_angle * PI / 180);
+	if (camera_distance == 0)
+	{
+		gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, sinf(camera_angle * PI / 180), 0, cosf(camera_angle * PI / 180));
 	}
-	else {
-		gluLookAt(0.0, 2.0, -2.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	else
+	{
+		gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, 0, 1, 0);
 	}
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, screenWidth, screenHeight);
+	// Draw object
 	drawAxis();
 	drawObject();
+
 	glFlush();
 	glutSwapBuffers();
 }
@@ -146,6 +155,16 @@ void myKeyboard(unsigned char key, int x, int y) {
 		case 'V':
 			bTopView = !bTopView;
 			break;
+		case '+':
+			camera_distance += 0.2;
+			break;
+		case '-':
+			camera_distance -= 0.2;
+			break;
+		case '1':
+			break;
+		case '2':
+			break;
 	}
 	glutPostRedisplay();
 }
@@ -155,22 +174,32 @@ void mySpecialKeyboard(int key, int x, int y)
 	switch (key)
 	{
 	case GLUT_KEY_UP:
-		camera_height += 0.5;
+		camera_height += 0.2;
 		break;
 	case GLUT_KEY_DOWN:
-		camera_height -= 0.5;
-		if (camera_height < 0)
-			camera_height = 0;
+		camera_height -= 0.2;
 		break;
 	case GLUT_KEY_RIGHT:
-		camera_angle += 5;
+		camera_angle += 3;
 		break;
 	case GLUT_KEY_LEFT:
-		camera_angle -= 5;
+		camera_angle -= 3;
 		break;
 	default:
 		break;
 	}
+	glutPostRedisplay();
+}
+
+void Timer(int value)
+{
+	if (bAnimate)
+	{
+		/*rotor.rotateY += 1.5;
+		if (rotor.rotateY > 360)
+			rotor.rotateY -= 360;*/
+	}
+	glutTimerFunc(10, Timer, 0);
 	glutPostRedisplay();
 }
 
@@ -184,22 +213,48 @@ void myInit()
 	lookAt_Y = 1;
 	lookAt_Z = 0;
 
-	float	fHalfSize = 4;
+	// Timer for animation
+	glutTimerFunc(50, Timer, 0);
+
+	// View config
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-fHalfSize, fHalfSize, -fHalfSize, fHalfSize, -1000, 1000);
+	float screen_rat = (float)screenWidth / (float)screenHeight;
+	glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glEnable(GL_NORMALIZE);
+	glShadeModel(GL_SMOOTH);
+	glDepthFunc(GL_LEQUAL);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	GLfloat light_model_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_model_ambient);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	GLfloat light_ambient0[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light_diffuse0[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light_specular0[] = { 1.0, 1.0, 1.0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
 }
 
 void printMenu() {
-	cout << "1\tQuay nguoc chieu kim dong ho" << endl;
-	cout << "2\tQuay cung chieu kim dong ho" << endl;
-	cout << "->\tXoay khung canh sang trai" << endl;
-	cout << "<-\tXoay khung canh sang phai" << endl;
-	cout << "V-v\tChuyen doi giua 2 che do nhin" << endl;
-	cout << "W-w\tChuyen doi qua lai giua che do khung day va to mau" << endl;
+	cout << "1\t\tQuay nguoc chieu kim dong ho" << endl;
+	cout << "2\t\tQuay cung chieu kim dong ho" << endl;
+	cout << "->\t\tXoay khung canh sang trai" << endl;
+	cout << "<-\t\tXoay khung canh sang phai" << endl;
+	cout << "up arrow\t\tTang chieu cao camera" << endl;
+	cout << "down arrow\t\tGiam chieu cao camera" << endl;
+	cout << "+\t\tTang khoang cach camera" << endl;
+	cout << "-\t\tGiam khoang cach camera" << endl;
+	cout << "V-v\t\tChuyen doi giua 2 che do nhin" << endl;
+	cout << "W-w\t\tChuyen doi qua lai giua che do khung day va to mau" << endl;
 }
 
 int main(int argc, char* argv[])
