@@ -8,26 +8,26 @@ using namespace std;
 #define PI				3.14159265358979323846
 #define DRIVEN_WHEEL_E	0.3
 
-int		screenWidth = 1800;
+// Tham so cho cua so hien thi
+int		screenWidth = 900;
 int		screenHeight = 900;
 
-Mesh	tetrahedron;
-Mesh	cube;
-Mesh	cuboid;
-Mesh	cylinder;
-Mesh	cylinderWithHole;
-Mesh	shape2;
-Mesh	shape1;
+// Meshes
 Mesh	basePlate;
 Mesh	drivenWheel;
 Mesh	rotateWheel;
 
-int		nChoice = 1;
-
+// Tham so cho camera
+float camera_angle;
+float camera_height;
+float camera_distance;
+float camera_X, camera_Y, camera_Z;
+float lookAt_X, lookAt_Y, lookAt_Z;
 
 // Tham so chung cua vat the
 int nSegment = 20;
 bool bDrawWireFrame = false;
+bool bTopView = false;
 
 // Tham so kich thuoc cua base plate
 float BasePlate_Size = 5.0;
@@ -121,135 +121,100 @@ void myDisplay()
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(5, 5, 2, 0, 0, 0, 0, 1, 0);
-
-
+	if (bTopView) {
+		gluLookAt(0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+	}
+	else {
+		gluLookAt(0.0, 2.0, -2.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, screenWidth / 2, screenHeight);
-
+	glViewport(0, 0, screenWidth, screenHeight);
 	drawAxis();
-
-	glColor3f(0, 0, 0);
-	if (nChoice == 1)
-		tetrahedron.DrawWireframe();
-	else if (nChoice == 2)
-		cube.DrawWireframe();
-	else if (nChoice == 3) {
-		cuboid.DrawWireframe();
-	}
-	else if (nChoice == 4) {
-		cylinder.DrawWireframe();
-	}
-	else if (nChoice == 5) {
-		cylinderWithHole.DrawWireframe();
-	}
-	else if (nChoice == 6) {
-		shape2.DrawWireframe();
-	}
-	else if (nChoice == 7) {
-		shape1.DrawWireframe();
-	}
-	else if (nChoice == 8) {
-		basePlate.DrawWireframe();
-	}
-	else if (nChoice == 9) {
-		drivenWheel.DrawWireframe();
-	}
-	else if (nChoice == 10) {
-		rotateWheel.DrawWireframe();
-	}
-	else if (nChoice == 11) {
-		bDrawWireFrame = true;
-		drawObject();
-	}
-
-	glViewport(screenWidth / 2, 0, screenWidth / 2, screenHeight);
-
-	drawAxis();
-	if (nChoice == 1)
-		tetrahedron.DrawColor();
-	else if (nChoice == 2)
-		cube.DrawColor();
-	else if (nChoice == 3) {
-		cuboid.DrawColor();
-	}
-	else if (nChoice == 4) {
-		cylinder.DrawColor();
-	}
-	else if (nChoice == 5) {
-		cylinderWithHole.DrawColor();
-	}
-	else if (nChoice == 6) {
-		shape2.DrawColor();
-	}
-	else if (nChoice == 7) {
-		shape1.DrawColor();
-	}
-	else if (nChoice == 8) {
-		basePlate.DrawColor();
-	}
-	else if (nChoice == 9) {
-		drivenWheel.DrawColor();
-	}
-	else if (nChoice == 10) {
-		rotateWheel.DrawColor();
-	}
-	else if (nChoice == 11) {
-		bDrawWireFrame = false;
-		drawObject();
-	}
+	drawObject();
 	glFlush();
 	glutSwapBuffers();
 }
 
+void myKeyboard(unsigned char key, int x, int y) {
+	switch (key)
+	{
+		case 'w':
+		case 'W':
+			bDrawWireFrame = !bDrawWireFrame;
+			break;
+		case 'v':
+		case 'V':
+			bTopView = !bTopView;
+			break;
+	}
+	glutPostRedisplay();
+}
+
+void mySpecialKeyboard(int key, int x, int y)
+{
+	switch (key)
+	{
+	case GLUT_KEY_UP:
+		camera_height += 0.5;
+		break;
+	case GLUT_KEY_DOWN:
+		camera_height -= 0.5;
+		if (camera_height < 0)
+			camera_height = 0;
+		break;
+	case GLUT_KEY_RIGHT:
+		camera_angle += 5;
+		break;
+	case GLUT_KEY_LEFT:
+		camera_angle -= 5;
+		break;
+	default:
+		break;
+	}
+	glutPostRedisplay();
+}
+
 void myInit()
 {
+	// Khoi tao thong so cho camera
+	camera_angle = -45;		// Goc quay cua camera so voi truc Oy
+	camera_height = 4;		// Chieu cao cua camera so voi mat phang xOz
+	camera_distance = 6;	// Khoang cach cua camera so voi truc Oy
+	lookAt_X = 0;
+	lookAt_Y = 1;
+	lookAt_Z = 0;
+
 	float	fHalfSize = 4;
-
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
 	glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
-
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-fHalfSize, fHalfSize, -fHalfSize, fHalfSize, -1000, 1000);
 }
 
+void printMenu() {
+	cout << "1\tQuay nguoc chieu kim dong ho" << endl;
+	cout << "2\tQuay cung chieu kim dong ho" << endl;
+	cout << "->\tXoay khung canh sang trai" << endl;
+	cout << "<-\tXoay khung canh sang phai" << endl;
+	cout << "V-v\tChuyen doi giua 2 che do nhin" << endl;
+	cout << "W-w\tChuyen doi qua lai giua che do khung day va to mau" << endl;
+}
+
 int main(int argc, char* argv[])
 {
-	cout << "1. Tetrahedron" << endl;
-	cout << "2. Cube" << endl;
-	cout << "3. Cuboid" << endl;
-	cout << "4. Cylinder" << endl;
-	cout << "5. Cylinder with hole" << endl;
-	cout << "6. Shape 2" << endl;
-	cout << "7. Shape 1" << endl;
-	cout << "8. Base plate" << endl;
-	cout << "9. Driven wheel" << endl;
-	cout << "10. Rotate wheel" << endl;
-	cout << "11. Entire object" << endl;
-	cout << "Input the choice: " << endl;
-	cin >> nChoice;
-
 	glutInit(&argc, (char**)argv); //initialize the tool kit
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);//set the display mode
 	glutInitWindowSize(screenWidth, screenHeight); //set window size
 	glutInitWindowPosition(100, 100); // set window position on screen
-	glutCreateWindow("Lab 2"); // open the screen window
-
-	tetrahedron.CreateTetrahedron();
-	cube.CreateCube(1);
-	cuboid.CreateCuboid(2.0, 1.0, 1.0);
-	cylinder.CreateCylinder(10, 5.0, 2.0);
-	cylinderWithHole.CreateCylinderWithHole(10, 5.0, 2.0, 1.5);
-	Point3 O1_1{ 0.86603, 0, 0.5 };
-	shape2.CreateShape2(6, O1_1, 0.6, 1.0, 2.8, 3.5, 90);
-	Point3 O1_2{ 1, 0, 1 };
-	shape1.CreateShape1(30, 1.7, O1_2, 1.3, 3.0, 1.1, 1.0, 60, 100);
+	glutCreateWindow("Computer Graphic Assignment - 2020017"); // open the screen window
+	printMenu();
 	createObject();
 	myInit();
 	glutDisplayFunc(myDisplay);
+	glutKeyboardFunc(myKeyboard);
+	glutSpecialFunc(mySpecialKeyboard);
 	glutMainLoop();
 	return 0;
 }
