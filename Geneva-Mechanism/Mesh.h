@@ -42,6 +42,9 @@ public:
 
 	int		numFaces;
 	Face* face;
+
+	// For rotation
+	float fRotateAngleY;
 public:
 	Mesh()
 	{
@@ -49,6 +52,7 @@ public:
 		pt = NULL;
 		numFaces = 0;
 		face = NULL;
+		fRotateAngleY = 0.0;
 	}
 	~Mesh()
 	{

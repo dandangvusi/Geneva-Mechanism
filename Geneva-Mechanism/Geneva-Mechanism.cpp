@@ -47,16 +47,16 @@ int DW_iOpenAngle2 = 100;
 float DW_fBaseObjectHeight = 0.5;
 
 // Tham so kich thuoc cua rotate wheel
-Point3 RW_O1{ 0.0, 0.0, 1.4 };
+Point3 RW_O1{ 0.0, 0.0, 0.0 };	// tam cua shape2
 float RW_fShape2HigherHeight = 0.5;
 float RW_fShape2LowerHeight = 0.25;
 float RW_fShape2InRadius = 0.5;
 float RW_fShape2OutRadius = 0.7;
-int RW_iShape2OpenAngle = 60;
+int RW_iShape2OpenAngle = 90;
 int RW_iShape2CentralLeanAngle = 0;
 float RW_fCylinderHeight = 1.0;
 float RW_fCylinderRadius = DRIVEN_WHEEL_E * sin((DW_iOpenAngle1 / 2) * ((2 * PI) / 360));
-float RW_O1_O2_len = 0.6;
+float RW_O1_O2_len = 0.7; // khoang cach cua tam shape2 (O1) va tam cua cylinder (O2)
 float RW_fShape2BaseHeight = 1.0;
 float RW_fCylinderBaseHeight = 0.5;
 
@@ -99,12 +99,18 @@ void drawDrivenWheel() {
 }
 
 void drawRotateWheel() {
+	// dich chuyen truc toa do den tam quay cua "rotate wheel"
+	glPushMatrix();
+	glTranslated(0, 0, 1.4);
+	// xoay "rotate wheel"
+	glRotatef(rotateWheel.fRotateAngleY, 0, 1, 0);
 	if (bDrawWireFrame) {
 		rotateWheel.DrawWireframe();
 	}
 	else {
 		rotateWheel.DrawColor();
 	}
+	glPopMatrix();
 }
 
 void drawObject() {
@@ -121,27 +127,48 @@ void createObject() {
 
 void myDisplay()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	camera_X = camera_distance * sinf(camera_angle * PI / 180);
-	camera_Y = camera_height;
-	camera_Z = camera_distance * cosf(camera_angle * PI / 180);
-	if (camera_distance == 0)
-	{
-		gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, sinf(camera_angle * PI / 180), 0, cosf(camera_angle * PI / 180));
-	}
-	else
-	{
-		gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, 0, 1, 0);
-	}
-	glViewport(0, 0, screenWidth, screenHeight);
-	// Draw object
-	drawAxis();
-	drawObject();
+	// che do nhin tu tren xuong voi phep chieu truc giao
+	if (bTopView) {
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glOrtho(-3, 3, -3, 3, 1, 10);
+		gluLookAt(0, 6, 0, 0, 0, 0, 0, 0, 1);
 
-	glFlush();
-	glutSwapBuffers();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, screenWidth, screenHeight);
+
+		drawAxis();
+		drawObject();
+
+		glFlush();
+		glutSwapBuffers();
+	}
+	// che do nhin camera
+	else {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		float screen_rat = (float)screenWidth / (float)screenHeight;
+		glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);
+		camera_X = camera_distance * sinf(camera_angle * PI / 180);
+		camera_Y = camera_height;
+		camera_Z = camera_distance * cosf(camera_angle * PI / 180);
+		if (camera_distance == 0)
+		{
+			gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, sinf(camera_angle * PI / 180), 0, cosf(camera_angle * PI / 180));
+		}
+		else
+		{
+			gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, 0, 1, 0);
+		}
+		glViewport(0, 0, screenWidth, screenHeight);
+		// Draw object
+		drawAxis();
+		drawObject();
+
+		glFlush();
+		glutSwapBuffers();
+	}
 }
 
 void myKeyboard(unsigned char key, int x, int y) {
@@ -162,8 +189,16 @@ void myKeyboard(unsigned char key, int x, int y) {
 			camera_distance -= 0.2;
 			break;
 		case '1':
+			rotateWheel.fRotateAngleY += 3;
+			if (rotateWheel.fRotateAngleY > 360) {
+				rotateWheel.fRotateAngleY -= 360;
+			}
 			break;
 		case '2':
+			rotateWheel.fRotateAngleY -= 3;
+			if (rotateWheel.fRotateAngleY < 0) {
+				rotateWheel.fRotateAngleY += 360;
+			}
 			break;
 	}
 	glutPostRedisplay();
@@ -222,8 +257,8 @@ void myInit()
 	glEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	float screen_rat = (float)screenWidth / (float)screenHeight;
-	glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);
+	//float screen_rat = (float)screenWidth / (float)screenHeight;
+	//glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glEnable(GL_NORMALIZE);
