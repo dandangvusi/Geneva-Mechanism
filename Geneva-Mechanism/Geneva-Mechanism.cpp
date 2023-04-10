@@ -8,6 +8,72 @@ using namespace std;
 #define PI				3.14159265358979323846
 #define DRIVEN_WHEEL_E	0.3
 
+// Tham so quan he giua goc quay cua "rotate wheel" va "driven wheel"
+float drivenWheelAngle[61] = 
+{
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0, 
+0.0,
+0.714285714,
+1.428571429,
+2.142857143,
+2.857142857,
+3.571428571,
+4.285714286,
+5,
+5.714285714,
+6.428571429,
+7.142857143,
+7.857142857,
+8.571428571,
+9.285714286,
+10,
+10.71428571,
+11.42857143,
+12.14285714,
+12.85714286,
+13.57142857,
+14.28571429,
+15,
+15.71428571,
+16.42857143,
+17.14285714,
+17.85714286,
+18.57142857,
+19.28571429,
+20,
+20.71428571,
+21.42857143,
+22.14285714,
+22.85714286,
+23.57142857,
+24.28571429,
+25,
+25.71428571,
+26.42857143,
+27.14285714,
+27.85714286,
+28.57142857,
+29.28571429,
+30
+};
+
 // Tham so cho cua so hien thi
 int		screenWidth = 900;
 int		screenHeight = 900;
@@ -90,12 +156,17 @@ void drawBasePlate() {
 }
 
 void drawDrivenWheel() {
+	// dich chuyen truc toa do den tam quay cua "rotate wheel"
+	glPushMatrix();
+	glTranslated(0, 0, 0);
+	glRotatef(drivenWheel.fRotateAngleY, 0, 1, 0);
 	if (bDrawWireFrame) {
 		drivenWheel.DrawWireframe();
 	}
 	else {
 		drivenWheel.DrawColor();
 	}
+	glPopMatrix();
 }
 
 void drawRotateWheel() {
@@ -114,9 +185,9 @@ void drawRotateWheel() {
 }
 
 void drawObject() {
+	drawRotateWheel();
 	drawBasePlate();
 	drawDrivenWheel();
-	drawRotateWheel();
 }
 
 void createObject() {
@@ -172,6 +243,9 @@ void myDisplay()
 }
 
 void myKeyboard(unsigned char key, int x, int y) {
+	Point3 O{0, 0, 0};
+	float O_Ox_angle = 0;
+	int index = 0;
 	switch (key)
 	{
 		case 'w':
@@ -193,11 +267,27 @@ void myKeyboard(unsigned char key, int x, int y) {
 			if (rotateWheel.fRotateAngleY > 360) {
 				rotateWheel.fRotateAngleY -= 360;
 			}
+			if (rotateWheel.fRotateAngleY <= 180) {
+				index = (int)rotateWheel.fRotateAngleY / 3;
+				drivenWheel.fRotateAngleY = drivenWheelAngle[index];
+			}
+			else {
+				index = 120 - (int)rotateWheel.fRotateAngleY / 3;
+				drivenWheel.fRotateAngleY = 30 + 30 - drivenWheelAngle[index];
+			}
 			break;
 		case '2':
 			rotateWheel.fRotateAngleY -= 3;
 			if (rotateWheel.fRotateAngleY < 0) {
 				rotateWheel.fRotateAngleY += 360;
+			}
+			if (rotateWheel.fRotateAngleY <= 180) {
+				index = (int)rotateWheel.fRotateAngleY / 3;
+				drivenWheel.fRotateAngleY = drivenWheelAngle[index];
+			}
+			else {
+				index = 120 - (int)rotateWheel.fRotateAngleY / 3;
+				drivenWheel.fRotateAngleY = 30 + 30 - drivenWheelAngle[index];
 			}
 			break;
 	}
