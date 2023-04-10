@@ -9,69 +9,129 @@ using namespace std;
 #define DRIVEN_WHEEL_E	0.3
 
 // Tham so quan he giua goc quay cua "rotate wheel" va "driven wheel"
-float drivenWheelAngle[61] = 
+float drivenWheelAngle[121] = 
 {
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0, 
-0.0,
-0.714285714,
-1.428571429,
-2.142857143,
-2.857142857,
-3.571428571,
-4.285714286,
-5,
-5.714285714,
-6.428571429,
-7.142857143,
-7.857142857,
-8.571428571,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000,
+0.000000000, 
+0.050000000,
+0.071428571,
+0.107142857,
+0.142857143,
+0.185714286,
+0.228571429,
+0.492857143,
+0.850000000,
+1.357142857,
+1.928571429,
+2.428571429,
+3.000000000,
+3.500000000,
+4.178571429,
+4.750000000,
+5.428571429,
+6.142857143,
+6.928571429,
+7.678571429,
+8.500000000,
 9.285714286,
-10,
-10.71428571,
-11.42857143,
-12.14285714,
-12.85714286,
-13.57142857,
-14.28571429,
-15,
-15.71428571,
-16.42857143,
-17.14285714,
-17.85714286,
-18.57142857,
-19.28571429,
-20,
-20.71428571,
-21.42857143,
+10.14285714,
+10.96428571,
+11.78571429,
+12.64285714,
+13.50000000,
+14.39285714,
+15.32142857,
+16.28571429,
+17.28571429,
+18.21428571,
+19.21428571,
+20.21428571,
+21.21428571,
 22.14285714,
-22.85714286,
-23.57142857,
-24.28571429,
-25,
-25.71428571,
-26.42857143,
-27.14285714,
-27.85714286,
-28.57142857,
-29.28571429,
-30
+23.10714286,
+24.03571429,
+25.00000000,
+25.96428571,
+26.96428571,
+28.00000000,
+29.07142857,
+30.00000000,
+30.92857143,
+32.00000000,
+33.03571429,
+34.03571429,
+35.00000000,
+35.96428571,
+36.89285714,
+37.85714286,
+38.78571429,
+39.78571429,
+40.78571429,
+41.78571429,
+42.71428571,
+43.71428571,
+44.67857143,
+45.60714286,
+46.50000000,
+47.35714286,
+48.21428571,
+49.03571429,
+49.85714286,
+50.71428571,
+51.50000000,
+52.32142857,
+53.07142857,
+53.85714286,
+54.57142857,
+55.25000000,
+55.82142857,
+56.50000000,
+57.00000000,
+57.57142857,
+58.07142857,
+58.64285714,
+59.15000000,
+59.50714286,
+59.77142857,
+59.81428571,
+59.85714286,
+59.89285714,
+59.92857143,
+59.95000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000,
+60.00000000
 };
 
 // Tham so cho cua so hien thi
@@ -147,12 +207,17 @@ void drawAxis()
 }
 
 void drawBasePlate() {
+	// dich chuyen truc toa do den tam quay cua "rotate wheel"
+	glPushMatrix();
+	glTranslated(0, 0, 0);
+	glRotatef(basePlate.fRotateAngleY, 0, 1, 0);
 	if (bDrawWireFrame) {
 		basePlate.DrawWireframe();
 	}
 	else {
 		basePlate.DrawColor();
 	}
+	glPopMatrix();
 }
 
 void drawDrivenWheel() {
@@ -242,6 +307,13 @@ void myDisplay()
 	}
 }
 
+float findDrivenAngle(float RotateAngle) {
+	int rotate_cycle_nums = (int)RotateAngle / 360;
+	int rotate_remain = (int)RotateAngle % 360;
+	int index = rotate_remain / 3;
+	return rotate_cycle_nums * 60 + drivenWheelAngle[index];
+}
+
 void myKeyboard(unsigned char key, int x, int y) {
 	Point3 O{0, 0, 0};
 	float O_Ox_angle = 0;
@@ -264,31 +336,19 @@ void myKeyboard(unsigned char key, int x, int y) {
 			break;
 		case '1':
 			rotateWheel.fRotateAngleY += 3;
-			if (rotateWheel.fRotateAngleY > 360) {
-				rotateWheel.fRotateAngleY -= 360;
+			if (rotateWheel.fRotateAngleY > 2160) {
+				rotateWheel.fRotateAngleY -= 2160;
 			}
-			if (rotateWheel.fRotateAngleY <= 180) {
-				index = (int)rotateWheel.fRotateAngleY / 3;
-				drivenWheel.fRotateAngleY = drivenWheelAngle[index];
-			}
-			else {
-				index = 120 - (int)rotateWheel.fRotateAngleY / 3;
-				drivenWheel.fRotateAngleY = 30 + 30 - drivenWheelAngle[index];
-			}
+			drivenWheel.fRotateAngleY = findDrivenAngle(rotateWheel.fRotateAngleY);
+			basePlate.fRotateAngleY = findDrivenAngle(rotateWheel.fRotateAngleY);
 			break;
 		case '2':
 			rotateWheel.fRotateAngleY -= 3;
 			if (rotateWheel.fRotateAngleY < 0) {
-				rotateWheel.fRotateAngleY += 360;
+				rotateWheel.fRotateAngleY += 2160;
 			}
-			if (rotateWheel.fRotateAngleY <= 180) {
-				index = (int)rotateWheel.fRotateAngleY / 3;
-				drivenWheel.fRotateAngleY = drivenWheelAngle[index];
-			}
-			else {
-				index = 120 - (int)rotateWheel.fRotateAngleY / 3;
-				drivenWheel.fRotateAngleY = 30 + 30 - drivenWheelAngle[index];
-			}
+			drivenWheel.fRotateAngleY = findDrivenAngle(rotateWheel.fRotateAngleY);
+			basePlate.fRotateAngleY = findDrivenAngle(rotateWheel.fRotateAngleY);
 			break;
 	}
 	glutPostRedisplay();
