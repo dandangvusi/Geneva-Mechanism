@@ -135,8 +135,8 @@ float drivenWheelAngle[121] =
 };
 
 // Tham so cho cua so hien thi
-int		screenWidth = 900;
-int		screenHeight = 900;
+int		screenWidth = 1000;
+int		screenHeight = 1000;
 
 // Meshes
 Mesh	basePlate;
@@ -211,11 +211,19 @@ void drawBasePlate() {
 	glPushMatrix();
 	glTranslated(0, 0, 0);
 	glRotatef(basePlate.fRotateAngleY, 0, 1, 0);
+
+	// cac thong so mau va anh sang cua vat the
+	GLfloat ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat diffuse[] = { 1.0, 0.0, 0.0, 1.0 };
+	GLfloat specular[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat shininess = 100.0;
+	basePlate.setupMaterial(ambient, diffuse, specular, shininess);
+
 	if (bDrawWireFrame) {
 		basePlate.DrawWireframe();
 	}
 	else {
-		basePlate.DrawColor();
+		basePlate.Draw();
 	}
 	glPopMatrix();
 }
@@ -225,11 +233,19 @@ void drawDrivenWheel() {
 	glPushMatrix();
 	glTranslated(0, 0, 0);
 	glRotatef(drivenWheel.fRotateAngleY, 0, 1, 0);
+
+	// cac thong so mau va anh sang cua vat the
+	GLfloat ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat diffuse[] = { 0.2, 0.2, 1.0, 1.0 };
+	GLfloat specular[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat shininess = 100.0;
+	drivenWheel.setupMaterial(ambient, diffuse, specular, shininess);
+
 	if (bDrawWireFrame) {
 		drivenWheel.DrawWireframe();
 	}
 	else {
-		drivenWheel.DrawColor();
+		drivenWheel.Draw();
 	}
 	glPopMatrix();
 }
@@ -240,11 +256,19 @@ void drawRotateWheel() {
 	glTranslated(0, 0, 1.4);
 	// xoay "rotate wheel"
 	glRotatef(rotateWheel.fRotateAngleY, 0, 1, 0);
+
+	// cac thong so mau va anh sang cua vat the
+	GLfloat ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat diffuse[] = { 0.0, 1.0, 0.0, 1.0 };
+	GLfloat specular[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat shininess = 100.0;
+	rotateWheel.setupMaterial(ambient, diffuse, specular, shininess);
+
 	if (bDrawWireFrame) {
 		rotateWheel.DrawWireframe();
 	}
 	else {
-		rotateWheel.DrawColor();
+		rotateWheel.Draw();
 	}
 	glPopMatrix();
 }
@@ -256,9 +280,20 @@ void drawObject() {
 }
 
 void createObject() {
+	// tao base plate
 	basePlate.CreateBasePlate(BasePlate_Size, BasePlate_Height, BasePlate_BaseHeight);
+	basePlate.SetColor(3);
+	basePlate.CalculateFacesNorm();
+
+	// tao driven wheel
 	drivenWheel.CreateDrivenWheel(nSegment, DW_O1_O2_len, DW_fO1InRadius, DW_fO1OutRadius, DW_fO2Radius, DW_fHeight, DW_iOpenAngle1, DW_iOpenAngle2, DW_fBaseObjectHeight);
+	drivenWheel.SetColor(7);
+	drivenWheel.CalculateFacesNorm();
+
+	// tao rotate wheel
 	rotateWheel.CreateRotateWheel(nSegment, RW_O1, RW_fShape2HigherHeight, RW_fShape2LowerHeight, RW_fShape2InRadius, RW_fShape2OutRadius, RW_iShape2OpenAngle, RW_iShape2CentralLeanAngle, RW_fCylinderHeight, RW_fCylinderRadius, RW_O1_O2_len, RW_fShape2BaseHeight, RW_fCylinderBaseHeight);
+	rotateWheel.SetColor(10);
+	rotateWheel.CalculateFacesNorm();
 }
 
 void myDisplay()
@@ -282,6 +317,25 @@ void myDisplay()
 	// che do nhin camera
 	else {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		GLfloat light_position0[] = { 3.0, 3.0, 3.0, 0.0 };
+		glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
+
+		if (bSecondLight)
+		{
+			glEnable(GL_LIGHT1);
+			GLfloat diffuse1[] = { 1.0, 1.0, 1.0, 1.0 };
+			GLfloat specular1[] = { 1.0, 1.0, 1.0, 1.0 };
+			GLfloat ambient1[] = { 0.0, 0.0, 0.0, 1.0 };
+			GLfloat position1[] = { -10.0, 10.0, -10.0, 0.0 };
+
+			glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse1);
+			glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
+			glLightfv(GL_LIGHT1, GL_SPECULAR, specular1);
+			glLightfv(GL_LIGHT1, GL_POSITION, position1);
+		}
+		else
+			glDisable(GL_LIGHT1);
+
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		float screen_rat = (float)screenWidth / (float)screenHeight;
@@ -298,7 +352,12 @@ void myDisplay()
 			gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, 0, 1, 0);
 		}
 		glViewport(0, 0, screenWidth, screenHeight);
-		// Draw object
+
+		// Clear the stencil buffers
+		glClearStencil(0);
+		// Clear depth
+		glClearDepth(1.0f);
+		// Draw
 		drawAxis();
 		drawObject();
 
@@ -320,6 +379,10 @@ void myKeyboard(unsigned char key, int x, int y) {
 	int index = 0;
 	switch (key)
 	{
+		case 'd':
+		case 'D':
+			bSecondLight = !bSecondLight;
+			break;
 		case 'w':
 		case 'W':
 			bDrawWireFrame = !bDrawWireFrame;
@@ -380,9 +443,12 @@ void Timer(int value)
 {
 	if (bAnimate)
 	{
-		/*rotor.rotateY += 1.5;
-		if (rotor.rotateY > 360)
-			rotor.rotateY -= 360;*/
+		rotateWheel.fRotateAngleY += 3;
+		if (rotateWheel.fRotateAngleY > 2160) {
+			rotateWheel.fRotateAngleY -= 2160;
+		}
+		drivenWheel.fRotateAngleY = findDrivenAngle(rotateWheel.fRotateAngleY);
+		basePlate.fRotateAngleY = findDrivenAngle(rotateWheel.fRotateAngleY);
 	}
 	glutTimerFunc(10, Timer, 0);
 	glutPostRedisplay();
@@ -415,13 +481,16 @@ void myInit()
 	glShadeModel(GL_SMOOTH);
 	glDepthFunc(GL_LEQUAL);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// lightning
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	GLfloat light_model_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_model_ambient);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-	GLfloat light_ambient0[] = { 0.0, 0.0, 0.0, 1.0 };
+
+	GLfloat light_ambient0[] = { 0.5, 0.5, 0.5, 1.0 };
 	GLfloat light_diffuse0[] = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat light_specular0[] = { 1.0, 1.0, 1.0, 1.0 };
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
@@ -440,17 +509,18 @@ void printMenu() {
 	cout << "-\t\tGiam khoang cach camera" << endl;
 	cout << "V-v\t\tChuyen doi giua 2 che do nhin" << endl;
 	cout << "W-w\t\tChuyen doi qua lai giua che do khung day va to mau" << endl;
+	cout << "D-d\t\tBat/tat nguon sang thu hai" << endl;
 }
 
 int main(int argc, char* argv[])
 {
 	glutInit(&argc, (char**)argv); //initialize the tool kit
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);//set the display mode
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH); //set the display mode
 	glutInitWindowSize(screenWidth, screenHeight); //set window size
 	glutInitWindowPosition(100, 100); // set window position on screen
 	glutCreateWindow("Computer Graphic Assignment - 2020017"); // open the screen window
-	printMenu();
-	createObject();
+	printMenu(); // sprint command line interface
+	createObject(); // create the object
 	myInit();
 	glutDisplayFunc(myDisplay);
 	glutKeyboardFunc(myKeyboard);

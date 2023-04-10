@@ -1334,3 +1334,45 @@ void Mesh::SetColor(int colorIdx)
 	}
 }
 
+// lab 5
+void Mesh::CalculateFacesNorm()
+{
+	for (int f = 0; f < numFaces; f++)
+	{
+		float mx = 0, my = 0, mz = 0;
+		for (int v = 0; v < face[f].nVerts; v++)
+		{
+			int iv = face[f].vert[v].vertIndex;
+			int next = face[f].vert[(v + 1) % face[f].nVerts].vertIndex;
+			mx += (pt[iv].y - pt[next].y) * (pt[iv].z + pt[next].z);
+			my += (pt[iv].z - pt[next].z) * (pt[iv].x + pt[next].x);
+			mz += (pt[iv].x - pt[next].x) * (pt[iv].y + pt[next].y);
+		}
+		face[f].facenorm.set(mx, my, mz);
+		face[f].facenorm.normalize();
+	}
+}
+
+void Mesh::Draw()
+{
+	for (int f = 0; f < numFaces; f++)
+	{
+		glBegin(GL_POLYGON);
+		for (int v = 0; v < face[f].nVerts; v++)
+		{
+			int iv = face[f].vert[v].vertIndex;
+			glNormal3f(face[f].facenorm.x, face[f].facenorm.y, face[f].facenorm.z);
+			glVertex3f(pt[iv].x, pt[iv].y, pt[iv].z);
+		}
+		glEnd();
+	}
+}
+
+void Mesh::setupMaterial(float ambient[], float diffuse[], float specular[], float shiness)
+{
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shiness);
+}
+
