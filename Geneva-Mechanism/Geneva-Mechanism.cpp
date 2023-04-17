@@ -186,9 +186,6 @@ float RW_O1_O2_len = 0.7; // khoang cach cua tam shape2 (O1) va tam cua cylinder
 float RW_fShape2BaseHeight = 1.0;
 float RW_fCylinderBaseHeight = 0.5;
 
-
-
-
 void drawAxis()
 {
 	glBegin(GL_LINES);
@@ -258,8 +255,8 @@ void drawRotateWheel() {
 	glRotatef(rotateWheel.fRotateAngleY, 0, 1, 0);
 
 	// cac thong so mau va anh sang cua vat the
+	GLfloat diffuse[] = { 0.5, 0.5, 0.5, 1.0 };
 	GLfloat ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLfloat diffuse[] = { 0.0, 1.0, 0.0, 1.0 };
 	GLfloat specular[] = { 0.0, 0.0, 0.0, 1.0 };
 	GLfloat shininess = 100.0;
 	rotateWheel.setupMaterial(ambient, diffuse, specular, shininess);
@@ -298,10 +295,33 @@ void createObject() {
 
 void myDisplay()
 {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	GLfloat light_position0[] = { 6.0, 6.0, 6.0, 0.0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
+
+	if (bSecondLight)
+	{
+		glEnable(GL_LIGHT1);
+
+		GLfloat diffuse1[] = { 1.0, 1.0, 1.0, 1.0 };
+		GLfloat specular1[] = { 1.0, 1.0, 1.0, 1.0 };
+		GLfloat ambient1[] = { 0.0, 0.0, 0.0, 1.0 };
+		GLfloat position1[] = { -6.0, 6.0, -6.0, 0.0 };
+
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse1);
+		glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, specular1);
+		glLightfv(GL_LIGHT1, GL_POSITION, position1);
+	}
+	else {
+		glDisable(GL_LIGHT1);
+	}
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
 	// che do nhin tu tren xuong voi phep chieu truc giao
 	if (bTopView) {
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
 		glOrtho(-3, 3, -3, 3, 1, 10);
 		gluLookAt(0, 6, 0, 0, 0, 0, 0, 0, 1);
 
@@ -316,30 +336,8 @@ void myDisplay()
 	}
 	// che do nhin camera
 	else {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		GLfloat light_position0[] = { 3.0, 3.0, 3.0, 0.0 };
-		glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
-
-		if (bSecondLight)
-		{
-			glEnable(GL_LIGHT1);
-			GLfloat diffuse1[] = { 1.0, 1.0, 1.0, 1.0 };
-			GLfloat specular1[] = { 1.0, 1.0, 1.0, 1.0 };
-			GLfloat ambient1[] = { 0.0, 0.0, 0.0, 1.0 };
-			GLfloat position1[] = { -10.0, 10.0, -10.0, 0.0 };
-
-			glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse1);
-			glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
-			glLightfv(GL_LIGHT1, GL_SPECULAR, specular1);
-			glLightfv(GL_LIGHT1, GL_POSITION, position1);
-		}
-		else
-			glDisable(GL_LIGHT1);
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		float screen_rat = (float)screenWidth / (float)screenHeight;
-		glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);
+		/*float screen_rat = (float)screenWidth / (float)screenHeight;
+		glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);*/
 		camera_X = camera_distance * sinf(camera_angle * PI / 180);
 		camera_Y = camera_height;
 		camera_Z = camera_distance * cosf(camera_angle * PI / 180);
@@ -465,7 +463,7 @@ void myInit()
 	lookAt_Z = 0;
 
 	// Timer for animation
-	glutTimerFunc(50, Timer, 0);
+	//glutTimerFunc(50, Timer, 0);
 
 	// View config
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -473,8 +471,8 @@ void myInit()
 	glEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//float screen_rat = (float)screenWidth / (float)screenHeight;
-	//glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);
+	float screen_rat = (float)screenWidth / (float)screenHeight;
+	glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glEnable(GL_NORMALIZE);
