@@ -317,13 +317,14 @@ void myDisplay()
 		glDisable(GL_LIGHT1);
 	}
 
-	glMatrixMode(GL_MODELVIEW);
+	//glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
 	// che do nhin tu tren xuong voi phep chieu truc giao
 	if (bTopView) {
 		glOrtho(-3, 3, -3, 3, 1, 10);
-		gluLookAt(0, 6, 0, 0, 0, 0, 0, 0, 1);
+		gluLookAt(0, 6, 0, 0, 0, 0, 1, 0, 0);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, screenWidth, screenHeight);
@@ -336,8 +337,8 @@ void myDisplay()
 	}
 	// che do nhin camera
 	else {
-		/*float screen_rat = (float)screenWidth / (float)screenHeight;
-		glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);*/
+		float screen_rat = (float)screenWidth / (float)screenHeight;
+		glFrustum(-screen_rat, screen_rat, -1.0, 1.0, 1.5, 100.0);
 		camera_X = camera_distance * sinf(camera_angle * PI / 180);
 		camera_Y = camera_height;
 		camera_Z = camera_distance * cosf(camera_angle * PI / 180);
